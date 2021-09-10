@@ -24,6 +24,23 @@ function checksExistsUserAccount(request, response, next) {
   return next();
 }
 
+const checkTaskExists = (request, response, next) => {
+  const {
+    user,
+    params: { id },
+  } = request;
+
+  const task = user.todos.find((task) => task.id === id);
+
+  if (!task) {
+    return response.status(404).json({ error: "Task doesn't exists" });
+  }
+
+  request.task = task;
+
+  return next();
+};
+
 app.post("/users", (request, response) => {
   const { name, username } = request.body;
 
@@ -68,9 +85,20 @@ app.post("/todos", checksExistsUserAccount, (request, response) => {
   return response.status(201).json(task);
 });
 
-app.put("/todos/:id", checksExistsUserAccount, (request, response) => {
-  // Complete aqui
-});
+app.put(
+  "/todos/:id",
+  checksExistsUserAccount,
+  checkTaskExists,
+  (request, response) => {
+    const { title, deadline } = request.body;
+    const { task } = request;
+
+    task.title = title;
+    task.deadline = deadline;
+
+    return response.status(201).json(task);
+  }
+);
 
 app.patch("/todos/:id/done", checksExistsUserAccount, (request, response) => {
   // Complete aqui
