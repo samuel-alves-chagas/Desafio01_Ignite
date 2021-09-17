@@ -25,10 +25,8 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 const checkTaskExists = (request, response, next) => {
-  const {
-    user,
-    params: { id },
-  } = request;
+  const { user } = request;
+  const { id } = request.params;
 
   const task = user.todos.find((task) => task.id === id);
 
@@ -100,9 +98,19 @@ app.put(
   }
 );
 
-app.patch("/todos/:id/done", checksExistsUserAccount, (request, response) => {
-  // Complete aqui
-});
+app.patch(
+  "/todos/:id/done",
+  checksExistsUserAccount,
+  checkTaskExists,
+  (request, response) => {
+    const { task } = request;
+
+    console.log(request.user.todos);
+    task.done = true;
+    console.log(request.user.todos);
+    return response.status(201).json(task);
+  }
+);
 
 app.delete("/todos/:id", checksExistsUserAccount, (request, response) => {
   // Complete aqui
