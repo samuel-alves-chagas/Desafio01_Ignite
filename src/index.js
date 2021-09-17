@@ -105,15 +105,21 @@ app.patch(
   (request, response) => {
     const { task } = request;
 
-    console.log(request.user.todos);
     task.done = true;
-    console.log(request.user.todos);
     return response.status(201).json(task);
   }
 );
 
-app.delete("/todos/:id", checksExistsUserAccount, (request, response) => {
-  // Complete aqui
-});
+app.delete(
+  "/todos/:id",
+  checksExistsUserAccount,
+  checkTaskExists,
+  (request, response) => {
+    const { task, user } = request;
+    taskIndex = user.todos.findIndex((candidate) => candidate.id === task.id);
+    user.todos.splice(taskIndex, 1);
+    return response.status(200).json(user.todos);
+  }
+);
 
 module.exports = app;
